@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">RF Scythe</string>
+    <string name="app_desc">RF Quantum Scythe tactical interface for ATAK — interfaces with rf_scythe_api_server</string>
+    <string name="connect">Connect</string>
+    <string name="connecting">Connecting…</string>
+    <string name="connected">Connected</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="refresh">Refresh</string>
+    <string name="inject_cot">Inject CoT</string>
+    <string name="push_tak">Push TAK</string>
+    <string name="tab_connect">CONNECT</string>
+    <string name="tab_rf">RF INTEL</string>
+    <string name="tab_missions">MISSIONS</string>
+    <string name="hint_host">192.168.1.100</string>
+    <string name="hint_port">8080</string>
+    <string name="hint_callsign">ALPHA-1</string>
+    <string name="hint_tak_host">239.2.3.1</string>
+    <string name="new_mission">+ New Mission</string>
+    <string name="status_offline">OFFLINE</string>
+    <string name="status_online">ONLINE</string>
+    <string name="status_streaming">STREAMING</string>
+</resources>

@@ -1,0 +1,90 @@
+////////////////////////////////////////////////////////////////////////////////
+// RF Scythe ATAK Plugin - app/build.gradle
+// Targets ATAK CIV 4.6.0 | No native code → no ELF alignment risk
+////////////////////////////////////////////////////////////////////////////////
+
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.atakmap.android.scythe.plugin'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.atakmap.android.scythe.plugin"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName project.PLUGIN_VERSION
+
+        multiDexEnabled true
+
+        // Expose server defaults as build-time constants (overridable at build)
+        buildConfigField "String",  "DEFAULT_SCYTHE_HOST", '"192.168.1.100"'
+        buildConfigField "int",     "DEFAULT_SCYTHE_PORT", '8080'
+        buildConfigField "String",  "ATAK_VERSION",        '"' + project.ATAK_VERSION + '"'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
+                          'proguard-rules.pro'
+            manifestPlaceholders = [atakApiVersion: project.ATAK_VERSION]
+        }
+        debug {
+            debuggable true
+            manifestPlaceholders = [atakApiVersion: project.ATAK_VERSION]
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildFeatures {
+        buildConfig true
+        viewBinding true
+    }
+
+    // -----------------------------------------------------------------------
+    // 16KB ELF Compliance
+    // No native .so in this plugin. Flag ensures any transitively-bundled
+    // host libs keep their original alignment (uncompressed / page-aligned).
+    // -----------------------------------------------------------------------
+    packaging {
+        jniLibs {
+            useLegacyPackaging = false   // do NOT extract + re-compress .so files
+        }
+        resources {
+            excludes += [
+                '/META-INF/{AL2.0,LGPL2.1}',
+                '/META-INF/DEPENDENCIES',
+            ]
+        }
+    }
+}
+
+dependencies {
+    // ATAK plugin SDK  (requires local ATAK SDK or takdev gradle plugin)
+    // When building with the official TAK Dev Kit, replace with:
+    //   compileOnly 'com.atakmap.app:ATAK-CIV-RELEASE:4.6.0:api@jar'
+    // For local/offline development, stub JAR placed in libs/
+    compileOnly fileTree(dir: 'libs', include: ['*.jar'])
+
+    // HTTP client + SSE — OkHttp 4.x (compatible with Android SDK 24+)
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+
+    // JSON parsing — org.json ships with Android; explicit dep for clarity
+    // No Gson/Moshi to keep transitive deps minimal for plugin APK size
+
+    // Android core
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.core:core:1.12.0'
+
+    testImplementation 'junit:junit:4.13.2'
+}

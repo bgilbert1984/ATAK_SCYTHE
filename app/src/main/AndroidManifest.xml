@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  RF Scythe ATAK Plugin Manifest
+  Plugin for ATAK CIV 4.6.0 — interfaces with rf_scythe_api_server.py
+
+  ELF 16KB Note:
+    android:extractNativeLibs="false" → keeps any embedded .so files
+    page-aligned (16KB) rather than extracting with legacy 4KB alignment.
+    This plugin ships NO native .so; the flag is precautionary for any
+    ATAK SDK stubs bundled at runtime.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.atakmap.android.scythe.plugin">
+
+    <!-- Network access for rf_scythe_api_server.py -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Allows plugin to be discovered by ATAK -->
+    <uses-permission android:name="com.atakmap.app.ALLOW_PLUGIN" />
+
+    <application
+        android:allowBackup="false"
+        android:label="@string/app_name"
+        android:description="@string/app_desc"
+        android:icon="@drawable/ic_scythe"
+        android:theme="@style/Theme.AppCompat.NoActionBar"
+        android:extractNativeLibs="false"
+        tools:targetApi="31">
+
+        <!-- ATAK plugin API version declaration -->
+        <meta-data
+            android:name="plugin-api"
+            android:value="${atakApiVersion}" />
+
+        <meta-data
+            android:name="app_desc"
+            android:value="@string/app_desc" />
+
+        <!-- Plugin discovery activity (required by ATAK plugin loader) -->
+        <activity
+            android:name="com.atakmap.app.component"
+            tools:ignore="MissingClass">
+            <intent-filter android:label="@string/app_name">
+                <action android:name="com.atakmap.app.component" />
+            </intent-filter>
+        </activity>
+
+    </application>
+
+</manifest>

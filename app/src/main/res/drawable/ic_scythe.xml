@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- RF antenna / signal icon for toolbar button -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Vertical antenna mast -->
+    <path
+        android:pathData="M12,14 L12,22"
+        android:strokeColor="#00FF88"
+        android:strokeWidth="2"
+        android:strokeLineCap="round" />
+    <!-- Signal arcs -->
+    <path
+        android:pathData="M8,11 Q12,7 16,11"
+        android:strokeColor="#00FF88"
+        android:strokeWidth="1.8"
+        android:fillColor="@android:color/transparent"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M5,8 Q12,2 19,8"
+        android:strokeColor="#00FF88"
+        android:strokeWidth="1.4"
+        android:fillColor="@android:color/transparent"
+        android:strokeLineCap="round" />
+    <!-- Dot at signal origin -->
+    <circle
+        android:cx="12"
+        android:cy="14"
+        android:r="1.5"
+        android:fillColor="#00FF88" />
+</vector>

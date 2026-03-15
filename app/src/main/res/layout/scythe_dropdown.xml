@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1A1A2E"
+    android:padding="0dp">
+
+    <!-- Header bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:background="#0F3460"
+        android:gravity="center_vertical"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp">
+
+        <TextView
+            android:id="@+id/txt_plugin_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/app_name"
+            android:textColor="#00FF88"
+            android:textSize="16sp"
+            android:fontFamily="monospace"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txt_status_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OFFLINE"
+            android:textColor="#FF4444"
+            android:textSize="11sp"
+            android:fontFamily="monospace"
+            android:background="@drawable/badge_bg"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp" />
+    </LinearLayout>
+
+    <!-- Tab bar -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_layout"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="#16213E"
+        app:tabTextColor="#888888"
+        app:tabSelectedTextColor="#00FF88"
+        app:tabIndicatorColor="#00FF88"
+        app:tabIndicatorHeight="2dp"
+        app:tabTextAppearance="@style/ScytheTabText" />
+
+    <!-- Paged content -->
+    <FrameLayout
+        android:id="@+id/panel_connect"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="visible">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Server address -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="SCYTHE SERVER"
+                    android:textColor="#00FF88"
+                    android:textSize="11sp"
+                    android:fontFamily="monospace"
+                    android:letterSpacing="0.1"
+                    android:layout_marginBottom="4dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/edit_host"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:hint="192.168.1.100"
+                        android:textColor="#E0E0E0"
+                        android:textColorHint="#555555"
+                        android:background="@drawable/input_bg"
+                        android:inputType="textNoSuggestions"
+                        android:textSize="13sp"
+                        android:fontFamily="monospace"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:text=":"
+                        android:textColor="#888888"
+                        android:gravity="center"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="4dp" />
+
+                    <EditText
+                        android:id="@+id/edit_port"
+                        android:layout_width="72dp"
+                        android:layout_height="40dp"
+                        android:hint="8080"
+                        android:textColor="#E0E0E0"
+                        android:textColorHint="#555555"
+                        android:background="@drawable/input_bg"
+                        android:inputType="number"
+                        android:textSize="13sp"
+                        android:fontFamily="monospace"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp" />
+                </LinearLayout>
+
+                <!-- Operator callsign -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="CALLSIGN"
+                    android:textColor="#00FF88"
+                    android:textSize="11sp"
+                    android:fontFamily="monospace"
+                    android:letterSpacing="0.1"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="4dp" />
+
+                <EditText
+                    android:id="@+id/edit_callsign"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:hint="ALPHA-1"
+                    android:textColor="#E0E0E0"
+                    android:textColorHint="#555555"
+                    android:background="@drawable/input_bg"
+                    android:inputType="textNoSuggestions|textCapCharacters"
+                    android:textSize="13sp"
+                    android:fontFamily="monospace"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp" />
+
+                <!-- Connect button -->
+                <Button
+                    android:id="@+id/btn_connect"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginTop="16dp"
+                    android:text="CONNECT"
+                    android:textColor="#000000"
+                    android:backgroundTint="#00FF88"
+                    android:textSize="13sp"
+                    android:fontFamily="monospace"
+                    android:textStyle="bold" />
+
+                <!-- Status output -->
+                <TextView
+                    android:id="@+id/txt_connect_log"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text=""
+                    android:textColor="#AAAAAA"
+                    android:textSize="12sp"
+                    android:fontFamily="monospace"
+                    android:maxLines="6"
+                    android:ellipsize="start"
+                    android:background="@drawable/log_bg"
+                    android:padding="8dp" />
+            </LinearLayout>
+        </ScrollView>
+    </FrameLayout>
+
+    <!-- RF Intel panel (hidden until tab selected) -->
+    <FrameLayout
+        android:id="@+id/panel_rf"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <!-- Toolbar row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:id="@+id/txt_node_count"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="0 nodes"
+                    android:textColor="#888888"
+                    android:textSize="12sp"
+                    android:fontFamily="monospace"
+                    android:gravity="center_vertical" />
+
+                <Button
+                    android:id="@+id/btn_refresh_rf"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:text="REFRESH"
+                    android:textColor="#00FF88"
+                    android:backgroundTint="#1A3355"
+                    android:textSize="11sp"
+                    android:fontFamily="monospace" />
+
+                <Button
+                    android:id="@+id/btn_inject_cot"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="8dp"
+                    android:text="INJECT CoT"
+                    android:textColor="#000000"
+                    android:backgroundTint="#00FF88"
+                    android:textSize="11sp"
+                    android:fontFamily="monospace" />
+            </LinearLayout>
+
+            <!-- Node list -->
+            <ListView
+                android:id="@+id/list_rf_nodes"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:divider="#1E1E3A"
+                android:dividerHeight="1dp"
+                android:background="@drawable/log_bg" />
+
+            <!-- Push to TAK network row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+
+                <EditText
+                    android:id="@+id/edit_tak_host"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:hint="239.2.3.1"
+                    android:textColor="#E0E0E0"
+                    android:textColorHint="#555555"
+                    android:background="@drawable/input_bg"
+                    android:inputType="textNoSuggestions"
+                    android:textSize="11sp"
+                    android:fontFamily="monospace"
+                    android:paddingStart="6dp"
+                    android:paddingEnd="6dp" />
+
+                <Button
+                    android:id="@+id/btn_push_tak"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="8dp"
+                    android:text="PUSH TAK"
+                    android:textColor="#000000"
+                    android:backgroundTint="#FF9900"
+                    android:textSize="11sp"
+                    android:fontFamily="monospace" />
+            </LinearLayout>
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- Missions panel (hidden until tab selected) -->
+    <FrameLayout
+        android:id="@+id/panel_missions"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <Button
+                    android:id="@+id/btn_refresh_missions"
+                    android:layout_width="0dp"
+                    android:layout_height="34dp"
+                    android:layout_weight="1"
+                    android:text="REFRESH"
+                    android:textColor="#00FF88"
+                    android:backgroundTint="#1A3355"
+                    android:textSize="11sp"
+                    android:fontFamily="monospace" />
+
+                <Button
+                    android:id="@+id/btn_new_mission"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="8dp"
+                    android:text="+ NEW"
+                    android:textColor="#000000"
+                    android:backgroundTint="#00FF88"
+                    android:textSize="11sp"
+                    android:fontFamily="monospace" />
+            </LinearLayout>
+
+            <ListView
+                android:id="@+id/list_missions"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="#1E1E3A"
+                android:dividerHeight="1dp"
+                android:background="@drawable/log_bg" />
+        </LinearLayout>
+    </FrameLayout>
+
+</LinearLayout>
