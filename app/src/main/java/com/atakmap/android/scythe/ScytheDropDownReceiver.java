@@ -19,6 +19,8 @@ import com.atakmap.android.maps.MapView;
 import com.atakmap.android.scythe.api.ScytheApiClient;
 import com.atakmap.android.scythe.api.SseStreamClient;
 import com.atakmap.android.scythe.layer.RFSignalLayer;
+import com.atakmap.android.scythe.layer.SwarmLayer;
+import com.atakmap.android.scythe.model.CyberCluster;
 import com.atakmap.android.scythe.model.RFNode;
 import com.atakmap.android.scythe.model.ScytheEntity;
 import com.atakmap.coremap.log.Log;
@@ -37,10 +39,11 @@ import java.util.List;
 /**
  * Main plugin UI panel — shown as ATAK drop-down drawer.
  *
- * Three tabs:
+ * Four tabs:
  *   CONNECT  — server address, operator callsign, register/login
  *   RF INTEL — live RF node list, CoT injection, push to TAK network
  *   MISSIONS — list + create missions from rf_scythe_api_server
+ *   SWARMS   — live CyberCluster swarm list + CoT injection
  *
  * Opened via {@link ScytheTool} toolbar button or broadcast intent:
  *   com.atakmap.android.scythe.SHOW_DROPDOWN
@@ -55,6 +58,7 @@ public class ScytheDropDownReceiver extends DropDownReceiver
     private final Handler      uiHandler = new Handler(Looper.getMainLooper());
     private final Context      pluginCtx;
     private final RFSignalLayer rfLayer;
+    private final SwarmLayer   swarmLayer;
 
     private ScytheApiClient   apiClient;
     private SseStreamClient   sseClient;
@@ -63,7 +67,7 @@ public class ScytheDropDownReceiver extends DropDownReceiver
     // UI references (non-null while panel is open)
     private View       rootView;
     private TabLayout  tabLayout;
-    private View       panelConnect, panelRf, panelMissions;
+    private View       panelConnect, panelRf, panelMissions, panelSwarms;
 
     // Connect tab
     private EditText editHost, editPort, editCallsign;
@@ -78,13 +82,18 @@ public class ScytheDropDownReceiver extends DropDownReceiver
     // Missions tab
     private ListView listMissions;
 
+    // Swarms tab
+    private ListView listSwarms;
+    private TextView txtSwarmCount, txtSwarmStreamStatus;
+
     // -------------------------------------------------------------------------
 
     public ScytheDropDownReceiver(MapView mapView, Context pluginCtx,
-                                   RFSignalLayer rfLayer) {
+                                   RFSignalLayer rfLayer, SwarmLayer swarmLayer) {
         super(mapView);
-        this.pluginCtx = pluginCtx;
-        this.rfLayer   = rfLayer;
+        this.pluginCtx  = pluginCtx;
+        this.rfLayer    = rfLayer;
+        this.swarmLayer = swarmLayer;
 
         // Create API + SSE clients with defaults (updated on connect)
         apiClient = new ScytheApiClient(
@@ -125,6 +134,7 @@ public class ScytheDropDownReceiver extends DropDownReceiver
         panelConnect  = rootView.findViewById(R.id.panel_connect);
         panelRf       = rootView.findViewById(R.id.panel_rf);
         panelMissions = rootView.findViewById(R.id.panel_missions);
+        panelSwarms   = rootView.findViewById(R.id.panel_swarms);
 
         // Connect tab
         editHost      = rootView.findViewById(R.id.edit_host);
@@ -141,6 +151,11 @@ public class ScytheDropDownReceiver extends DropDownReceiver
         // Missions tab
         listMissions  = rootView.findViewById(R.id.list_missions);
 
+        // Swarms tab
+        listSwarms         = rootView.findViewById(R.id.list_swarms);
+        txtSwarmCount      = rootView.findViewById(R.id.txt_swarm_count);
+        txtSwarmStreamStatus = rootView.findViewById(R.id.txt_swarm_stream_status);
+
         // Pre-fill with build defaults
         editHost.setText(BuildConfig.DEFAULT_SCYTHE_HOST);
         editPort.setText(String.valueOf(BuildConfig.DEFAULT_SCYTHE_PORT));
@@ -149,11 +164,13 @@ public class ScytheDropDownReceiver extends DropDownReceiver
         tabLayout.addTab(tabLayout.newTab().setText("CONNECT"));
         tabLayout.addTab(tabLayout.newTab().setText("RF INTEL"));
         tabLayout.addTab(tabLayout.newTab().setText("MISSIONS"));
+        tabLayout.addTab(tabLayout.newTab().setText("SWARMS"));
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override public void onTabSelected(TabLayout.Tab tab) {
                 showPanel(tab.getPosition());
                 if (tab.getPosition() == 1 && connected) doRefreshRf();
                 if (tab.getPosition() == 2 && connected) doRefreshMissions();
+                if (tab.getPosition() == 3 && connected) doRefreshSwarms();
             }
             @Override public void onTabUnselected(TabLayout.Tab tab) {}
             @Override public void onTabReselected(TabLayout.Tab tab) {}
@@ -166,12 +183,15 @@ public class ScytheDropDownReceiver extends DropDownReceiver
         rootView.findViewById(R.id.btn_push_tak).setOnClickListener(v -> doPushTak());
         rootView.findViewById(R.id.btn_refresh_missions).setOnClickListener(v -> doRefreshMissions());
         rootView.findViewById(R.id.btn_new_mission).setOnClickListener(v -> doNewMission());
+        rootView.findViewById(R.id.btn_refresh_swarms).setOnClickListener(v -> doRefreshSwarms());
+        rootView.findViewById(R.id.btn_inject_swarm_cot).setOnClickListener(v -> doInjectSwarmCot());
     }
 
     private void showPanel(int index) {
         panelConnect.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
         panelRf.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
         panelMissions.setVisibility(index == 2 ? View.VISIBLE : View.GONE);
+        panelSwarms.setVisibility(index == 3 ? View.VISIBLE : View.GONE);
     }
 
     // -------------------------------------------------------------------------
@@ -412,6 +432,69 @@ public class ScytheDropDownReceiver extends DropDownReceiver
         });
         dlg.setNegativeButton("Cancel", null);
         dlg.show();
+    }
+
+    // -------------------------------------------------------------------------
+    // Swarms tab actions
+    // -------------------------------------------------------------------------
+
+    public void refreshSwarmsFromLayer() {
+        // Called by ScytheMapComponent when SwarmLayer has new data (SSE stream)
+        if (panelSwarms == null || panelSwarms.getVisibility() != View.VISIBLE) return;
+        updateSwarmListUi(swarmLayer.getSnapshot());
+    }
+
+    private void doRefreshSwarms() {
+        if (!connected) return;
+        apiClient.getSwarms(new ScytheApiClient.ApiCallback<List<CyberCluster>>() {
+            @Override public void onSuccess(List<CyberCluster> clusters) {
+                swarmLayer.updateAll(clusters);
+                uiHandler.post(() -> {
+                    updateSwarmListUi(clusters);
+                    if (txtSwarmStreamStatus != null) {
+                        txtSwarmStreamStatus.setText("● LAST REFRESH: " + clusters.size() + " swarms");
+                        txtSwarmStreamStatus.setTextColor(0xFF00FF88);
+                    }
+                });
+            }
+            @Override public void onError(String msg) {
+                uiHandler.post(() -> {
+                    if (txtSwarmStreamStatus != null) {
+                        txtSwarmStreamStatus.setText("● ERROR: " + msg);
+                        txtSwarmStreamStatus.setTextColor(0xFFFF4444);
+                    }
+                });
+            }
+        });
+    }
+
+    private void doInjectSwarmCot() {
+        if (!connected) { appendLog("Not connected"); return; }
+        apiClient.getSwarmCot(new ScytheApiClient.ApiCallback<List<String>>() {
+            @Override public void onSuccess(List<String> cotEvents) {
+                int count = injectCotEvents(cotEvents);
+                uiHandler.post(() ->
+                        appendLog("✓ Injected " + count + " swarm CoT markers"));
+            }
+            @Override public void onError(String msg) {
+                uiHandler.post(() -> appendLog("Swarm CoT error: " + msg));
+            }
+        });
+    }
+
+    private void updateSwarmListUi(List<CyberCluster> clusters) {
+        if (listSwarms == null) return;
+        List<String> items = new ArrayList<>();
+        for (CyberCluster c : clusters) {
+            items.add(String.format("%s  nodes:%d  threat:%.0f%%  %s",
+                    c.behaviorType,
+                    c.nodeCount,
+                    c.threatScore * 100,
+                    c.threatLabel));
+        }
+        listSwarms.setAdapter(new ArrayAdapter<>(pluginCtx,
+                android.R.layout.simple_list_item_1, items));
+        if (txtSwarmCount != null) txtSwarmCount.setText(clusters.size() + " swarms");
     }
 
     // -------------------------------------------------------------------------

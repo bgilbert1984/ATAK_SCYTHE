@@ -338,4 +338,81 @@
         </LinearLayout>
     </FrameLayout>
 
+    <!-- Swarms panel (hidden until tab selected) -->
+    <FrameLayout
+        android:id="@+id/panel_swarms"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <!-- Header row: count + refresh -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:id="@+id/txt_swarm_count"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="0 swarms"
+                    android:textColor="#888888"
+                    android:textSize="12sp"
+                    android:fontFamily="monospace"
+                    android:gravity="center_vertical" />
+
+                <Button
+                    android:id="@+id/btn_refresh_swarms"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:text="REFRESH"
+                    android:textColor="#00FF88"
+                    android:backgroundTint="#1A3355"
+                    android:textSize="11sp"
+                    android:fontFamily="monospace" />
+
+                <Button
+                    android:id="@+id/btn_inject_swarm_cot"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="8dp"
+                    android:text="INJECT"
+                    android:textColor="#000000"
+                    android:backgroundTint="#FF4444"
+                    android:textSize="11sp"
+                    android:fontFamily="monospace" />
+            </LinearLayout>
+
+            <!-- Live swarm list -->
+            <ListView
+                android:id="@+id/list_swarms"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:divider="#1E1E3A"
+                android:dividerHeight="1dp"
+                android:background="@drawable/log_bg" />
+
+            <!-- SSE stream status -->
+            <TextView
+                android:id="@+id/txt_swarm_stream_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="● STREAM INACTIVE"
+                android:textColor="#FF4444"
+                android:textSize="11sp"
+                android:fontFamily="monospace" />
+        </LinearLayout>
+    </FrameLayout>
+
 </LinearLayout>

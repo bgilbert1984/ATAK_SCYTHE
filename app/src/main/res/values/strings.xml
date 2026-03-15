@@ -16,7 +16,8 @@
     <string name="hint_callsign">ALPHA-1</string>
     <string name="hint_tak_host">239.2.3.1</string>
     <string name="new_mission">+ New Mission</string>
-    <string name="status_offline">OFFLINE</string>
-    <string name="status_online">ONLINE</string>
-    <string name="status_streaming">STREAMING</string>
+    <string name="tab_swarms">SWARMS</string>
+    <string name="inject_swarm_cot">Inject Swarm CoT</string>
+    <string name="swarm_stream_active">● STREAM ACTIVE</string>
+    <string name="swarm_stream_inactive">● STREAM INACTIVE</string>
 </resources>

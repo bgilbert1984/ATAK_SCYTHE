@@ -8,16 +8,18 @@ import com.atakmap.android.ipc.AtakBroadcast;
 import com.atakmap.android.ipc.AtakBroadcast.DocumentedIntentFilter;
 import com.atakmap.android.maps.MapView;
 import com.atakmap.android.scythe.layer.GLRFSignalLayer;
+import com.atakmap.android.scythe.layer.GLSwarmLayer;
 import com.atakmap.android.scythe.layer.RFSignalLayer;
+import com.atakmap.android.scythe.layer.SwarmLayer;
 import com.atakmap.coremap.log.Log;
 
 /**
  * ATAK plugin Map Component.
  *
  * Lifecycle:
- *   onCreate  → create RFSignalLayer, register GL renderer SPI,
- *               add layer to map, register DropDown intent receiver
- *   onDestroy → unregister receiver, remove layer, stop network clients
+ *   onCreate  → create RFSignalLayer + SwarmLayer, register GL renderer SPIs,
+ *               add layers to map, register DropDown intent receiver
+ *   onDestroy → unregister receiver, remove layers, stop network clients
  *
  * The plugin has no native dependencies — all networking is pure Java/OkHttp.
  * ELF 16KB compliance is therefore enforced by packaging flags only
@@ -28,6 +30,7 @@ public class ScytheMapComponent extends DropDownMapComponent {
     public static final String TAG = "ScytheMapComponent";
 
     private RFSignalLayer          rfLayer;
+    private SwarmLayer             swarmLayer;
     private ScytheDropDownReceiver dropDown;
 
     @Override
@@ -40,18 +43,22 @@ public class ScytheMapComponent extends DropDownMapComponent {
         // 1. Create RF signal map layer
         // ----------------------------------------------------------------
         rfLayer = new RFSignalLayer();
-
-        // Register GL renderer factory so ATAK knows how to draw it
         com.atakmap.map.layer.opengl.GLLayerFactory.register(GLRFSignalLayer.SPI);
-
-        // Add to map widget stack (rendered above base map, below HUD)
         view.addLayer(MapView.RenderStack.WIDGETS, rfLayer);
         Log.d(TAG, "RFSignalLayer added to map");
 
         // ----------------------------------------------------------------
-        // 2. Create drop-down receiver
+        // 2. Create Swarm overlay layer
         // ----------------------------------------------------------------
-        dropDown = new ScytheDropDownReceiver(view, context, rfLayer);
+        swarmLayer = new SwarmLayer();
+        com.atakmap.map.layer.opengl.GLLayerFactory.register(GLSwarmLayer.SPI);
+        view.addLayer(MapView.RenderStack.WIDGETS, swarmLayer);
+        Log.d(TAG, "SwarmLayer added to map");
+
+        // ----------------------------------------------------------------
+        // 3. Create drop-down receiver
+        // ----------------------------------------------------------------
+        dropDown = new ScytheDropDownReceiver(view, context, rfLayer, swarmLayer);
 
         // Register broadcast intent that opens the panel
         DocumentedIntentFilter filter = new DocumentedIntentFilter();
@@ -75,6 +82,11 @@ public class ScytheMapComponent extends DropDownMapComponent {
         if (rfLayer != null) {
             view.removeLayer(MapView.RenderStack.WIDGETS, rfLayer);
             rfLayer = null;
+        }
+
+        if (swarmLayer != null) {
+            view.removeLayer(MapView.RenderStack.WIDGETS, swarmLayer);
+            swarmLayer = null;
         }
 
         super.onDestroyImpl(context, view);

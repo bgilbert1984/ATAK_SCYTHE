@@ -361,4 +361,75 @@ public class ScytheApiClient {
         http.dispatcher().cancelAll();
         http.connectionPool().evictAll();
     }
+
+    // -------------------------------------------------------------------------
+    // Swarm Cluster API
+    // -------------------------------------------------------------------------
+
+    /**
+     * GET /api/clusters/swarms
+     * Returns current CyberCluster list (JSON array under "clusters" key).
+     */
+    public void getSwarms(ApiCallback<List<com.atakmap.android.scythe.model.CyberCluster>> cb) {
+        getWithAuth("/api/clusters/swarms", new okhttp3.Callback() {
+            @Override public void onFailure(okhttp3.Call call, IOException e) {
+                cb.onError("getSwarms network error: " + e.getMessage());
+            }
+            @Override public void onResponse(okhttp3.Call call, Response resp) throws IOException {
+                if (!resp.isSuccessful()) {
+                    cb.onError("getSwarms HTTP " + resp.code());
+                    return;
+                }
+                try {
+                    String body = resp.body().string();
+                    JSONObject root = new JSONObject(body);
+                    JSONArray arr = root.optJSONArray("clusters");
+                    List<com.atakmap.android.scythe.model.CyberCluster> list = new ArrayList<>();
+                    if (arr != null) {
+                        for (int i = 0; i < arr.length(); i++) {
+                            try {
+                                list.add(com.atakmap.android.scythe.model.CyberCluster
+                                        .fromJson(arr.getJSONObject(i)));
+                            } catch (Exception ex) {
+                                Log.w(TAG, "getSwarms parse error at " + i, ex);
+                            }
+                        }
+                    }
+                    cb.onSuccess(list);
+                } catch (Exception e) {
+                    cb.onError("getSwarms parse error: " + e.getMessage());
+                }
+            }
+        });
+    }
+
+    /**
+     * GET /api/clusters/swarms/cot
+     * Returns all swarm clusters as CoT XML list; callers inject directly into ATAK.
+     */
+    public void getSwarmCot(ApiCallback<List<String>> cb) {
+        getWithAuth("/api/clusters/swarms/cot", new okhttp3.Callback() {
+            @Override public void onFailure(okhttp3.Call call, IOException e) {
+                cb.onError("getSwarmCot network error: " + e.getMessage());
+            }
+            @Override public void onResponse(okhttp3.Call call, Response resp) throws IOException {
+                if (!resp.isSuccessful()) {
+                    cb.onError("getSwarmCot HTTP " + resp.code());
+                    return;
+                }
+                try {
+                    String body = resp.body().string();
+                    JSONObject root = new JSONObject(body);
+                    JSONArray arr = root.optJSONArray("events");
+                    List<String> events = new ArrayList<>();
+                    if (arr != null) {
+                        for (int i = 0; i < arr.length(); i++) events.add(arr.getString(i));
+                    }
+                    cb.onSuccess(events);
+                } catch (Exception e) {
+                    cb.onError("getSwarmCot parse: " + e.getMessage());
+                }
+            }
+        });
+    }
 }
